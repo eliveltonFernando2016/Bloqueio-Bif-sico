@@ -12,7 +12,7 @@ public class TransacaoDao {
 
     public TransacaoDao() {
         minhaConexao = new MinhaConexao();
-        MinhaConexao.getCabecalho();
+        minhaConexao.getConnection();
     }
 
     public static void gravarTransacoes(Schedule schedule) {
