@@ -39,7 +39,7 @@ public class TransacaoDao {
         try {
             minhaConexao.releaseAll(stmt, conn);
         } catch (SQLException e) {
-            System.out.println("Erro ao encerrar conex�o");
+            System.out.println("Erro ao encerrar conexão");
             e.printStackTrace();
         }
     }
@@ -56,9 +56,13 @@ public class TransacaoDao {
             rs.next();
             ultimoIndice = rs.getInt(1);
         } catch (SQLException e) {
-            System.err.println("Erro na consulta ao �ltimo �ndice");
+            System.err.println("Erro na consulta ao ultimo Indice");
             e.printStackTrace();
         }
         return ultimoIndice;
+    }
+    
+    public void buscarTransacoes(){
+        
     }
 }
