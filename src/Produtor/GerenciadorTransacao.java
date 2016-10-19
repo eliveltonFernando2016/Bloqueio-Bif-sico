@@ -5,8 +5,6 @@ import java.util.LinkedList;
 public class GerenciadorTransacao {
     private ListaDados dados;
     private LinkedList<Transacao> listaTransacoes;
-
-
     private int numeroAcessos;
 	
     public GerenciadorTransacao(int numeroItens, int numeroTransacoes, int numeroAcessos, int ultimoIndice) {
@@ -20,14 +18,9 @@ public class GerenciadorTransacao {
         while(numeroTransacoes > 0) {
             ultimoIndice++;
             Transacao novaTransacao = new Transacao(dados, numeroAcessos, ultimoIndice);
-            printTransacao(novaTransacao);
             listaTransacoes.add(novaTransacao);
             numeroTransacoes--;
         }
-    }
-
-    private void printTransacao(Transacao novaTransacao) {
-
     }
 
     public LinkedList<Transacao> getListaTransacoes() {

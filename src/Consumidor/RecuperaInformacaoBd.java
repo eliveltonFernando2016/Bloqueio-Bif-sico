@@ -24,11 +24,11 @@ public class RecuperaInformacaoBd {
 
         minhaConexao = new MinhaConexao();
         minhaConexao.getConnection();
-        
+
         Connection conn = minhaConexao.getConnection();
-        
+
         try {
-            String sql = "Select * from schedule";
+            String sql = "SELECT * FROM schedule";
             PreparedStatement stm = conn.prepareStatement(sql);
 
             ResultSet rs = stm.executeQuery();
@@ -36,9 +36,10 @@ public class RecuperaInformacaoBd {
             while (rs.next()) {                
                 RecuperaInformacao info = new RecuperaInformacao(rs.getInt("idoperacao"),
                                                                  rs.getInt("indicetransacao"),
-                                                                 rs.getString("operacao"),
+                                                                 rs.getString("operacao").charAt(0),
                                                                  rs.getString("itemdado"),
-                                                                 rs.getString("timestampj"));
+                                                                 rs.getString("timestampj"),
+                                                                 rs.getInt("flag"));
                 
                 informacao.add(info);
             }

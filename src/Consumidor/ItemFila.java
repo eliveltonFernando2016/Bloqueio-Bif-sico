@@ -47,9 +47,4 @@ public class ItemFila {
     public void setDado(String dado) {
         this.dado = dado;
     }
-
-    @Override
-    public String toString() {
-        return "ItemFila{" + "estado=" + estado + ", transacao=" + transacao + ", dado=" + dado + '}';
-    }
 }

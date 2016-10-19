@@ -19,7 +19,7 @@ public class TransacaoDao {
         Operacao operacao = null;
 
         Connection conn = minhaConexao.getConnection();
-        String sql = "INSERT INTO schedule(indiceTransacao, operacao, itemDado, timestampj) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO schedule(indiceTransacao, operacao, itemDado, timestampj, flag) VALUES (?, ?, ?, ?, 0)";
         PreparedStatement stmt = null;
         
         while(!schedule.getScheduleInList().isEmpty()) {

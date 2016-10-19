@@ -8,7 +8,7 @@ public class Transacao {
     private int meuIndice;
     private LinkedList<Operacao> filaOperacoes;
     private String rotuloTransacao;
-	
+
     public Transacao(ListaDados dados, int numeroAcessos, int ultimoIndice) {
         meuIndice = ultimoIndice;
         filaOperacoes = new LinkedList<>();
@@ -45,7 +45,7 @@ public class Transacao {
             cursor++;
         }
     }
-	
+
     public int getMeuIndice() {
         return meuIndice;
     }

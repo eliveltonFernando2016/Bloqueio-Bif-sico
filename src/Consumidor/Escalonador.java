@@ -5,20 +5,12 @@
  */
 package Consumidor;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.List;
 
 /**
  *
@@ -38,6 +30,9 @@ public class Escalonador {
     public static final String statusDadoDesbloqueado = "U";
     public static final String statusDadoBloqueadoExclusivo = "X";
     public static final String statusDadoBloqueadoCompartilhado = "S";
+    
+    public List<RecuperaInformacao> informacoes = new ArrayList();
+    RecuperaInformacaoBd infoBD = new RecuperaInformacaoBd();
 
     public Escalonador() {
         filaTransacao = new LinkedList<>();
@@ -78,7 +73,7 @@ public class Escalonador {
         }
     }
 
-    void executar(String arquivotxt) throws FileNotFoundException, IOException {
+    /*void executar(String arquivotxt) throws FileNotFoundException, IOException {
         FileReader file = new FileReader(new File(arquivotxt));
         BufferedReader buffer = new BufferedReader(file);
         String linha;
@@ -126,7 +121,7 @@ public class Escalonador {
                 break;
             }
         }
-    }
+    }*/
 
     public void solicitacaoDesbloqueio(String transacao, String dado) {
         if (!dado.equals("infinito")) {
@@ -213,60 +208,65 @@ public class Escalonador {
         }
     }
 
-    private void escalonar(String[] schedule) {
-        System.out.println("Digite o nome do arquivo de Saida: ");
-        Scanner leitor = new Scanner(System.in);
-        String arq = leitor.next();
-        try {
-            writer = new PrintWriter(arq, "UTF-8");
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(Escalonador.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (UnsupportedEncodingException ex) {
-            Logger.getLogger(Escalonador.class.getName()).log(Level.SEVERE, null, ex);
+    public void escalonar() {
+        informacoes = infoBD.selectBD();
+
+        String schedule = null;
+
+        for(int i=0; i < informacoes.size(); i++){
+            if(i==0){
+                schedule = String.valueOf(informacoes.get(i).getOperacao());
+            }
+            else{
+                schedule = schedule.concat(String.valueOf(informacoes.get(i).getOperacao()));
+            }
+            
+            schedule = schedule.concat(String.valueOf(informacoes.get(i).getIndiceTransacao()));
+            
+            if(!("E".equals(informacoes.get(i).getOperacao()) || "S".equals(informacoes.get(i).getOperacao()))){
+                schedule = schedule.concat("(");
+                schedule = schedule.concat(informacoes.get(i).getItemDado());
+                schedule = schedule.concat(")");
+            }
+            
+            schedule = schedule.concat(", ");
         }
-        writer.write("Schedule: " + "\n");
-        for (String dado : dados) {
-            System.out.println(dado + "NOVO");
-            EstadoDado item = new EstadoDado("", 0);
-            estadoDadoCorrente.put(dado, item);
+
+        System.out.println(schedule);
+        /*for (String dado : dados) {
+        System.out.println(dado + "NOVO");
+        EstadoDado item = new EstadoDado("", 0);
+        estadoDadoCorrente.put(dado, item);
         }
         for (String i : schedule) {
-            //verifica se comeca uma transacao;
-
-            if (i.substring(0, 1).equals("S")) {
-                //comeca transacao
-                System.out.println("Comecou A transacao " + i);
-                writer.write(i + "\n");
-            }
-            if (i.substring(0, 1).equals("E")) {
-
-                writer.write(i + "\n");
-                //tem q ver se num tem nada na fila;
-                //termina transacao
-
-                solicitacaoDesbloqueio(i.substring(1, 2), "infinito");
-                verificarFila(i.substring(1, 2));
-                System.out.println("Commitou " + i);
-            }
-            if (i.substring(0, 1).equals("R")) {
-                //solicita bloqueio compartilhado
-                System.out.println(i.substring(1, 2));
-                System.out.println(i.substring(3, 4));
-                solicitacaoBloqueio(statusDadoBloqueadoCompartilhado, i.substring(1, 2), i.substring(3, 4));
-            }
-            if (i.substring(0, 1).equals("W")) {
-                //solicita bloqueio exclusivo
-                System.out.println(i.substring(1, 2));
-                System.out.println(i.substring(3, 4));
-                solicitacaoBloqueio(statusDadoBloqueadoExclusivo, i.substring(1, 2), i.substring(3, 4));
-
-            }
-
+        //verifica se comeca uma transacao;
+        if (i.substring(0, 1).equals("S")) {
+        //comeca transacao
+        System.out.println("Comecou A transacao " + i);
+        writer.write(i + "\n");
         }
-//        while (!filaDeTransacao.isEmpty()) {
-//            despertarFila();
-//        }
-        writer.close();
+        if (i.substring(0, 1).equals("E")) {
+        writer.write(i + "\n");
+        //tem q ver se num tem nada na fila;
+        //termina transacao
+        solicitacaoDesbloqueio(i.substring(1, 2), "infinito");
+        verificarFila(i.substring(1, 2));
+        System.out.println("Commitou " + i);
+        }
+        if (i.substring(0, 1).equals("R")) {
+        //solicita bloqueio compartilhado
+        System.out.println(i.substring(1, 2));
+        System.out.println(i.substring(3, 4));
+        solicitacaoBloqueio(statusDadoBloqueadoCompartilhado, i.substring(1, 2), i.substring(3, 4));
+        }
+        if (i.substring(0, 1).equals("W")) {
+        //solicita bloqueio exclusivo
+        System.out.println(i.substring(1, 2));
+        System.out.println(i.substring(3, 4));
+        solicitacaoBloqueio(statusDadoBloqueadoExclusivo, i.substring(1, 2), i.substring(3, 4));
+        }
+        }
+        writer.close();*/
     }
 
     private void verificarFila(String substring) {

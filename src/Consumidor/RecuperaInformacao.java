@@ -10,41 +10,43 @@ package Consumidor;
  * @author elivelton
  */
 public class RecuperaInformacao {
-    Integer idOperacao;
-    Integer indiceTransacao;
-    String operacao;
+    int idOperacao;
+    int indiceTransacao;
+    char operacao;
     String itemDado;
     String timeStamp;
+    int flag;
 
-    public RecuperaInformacao(Integer idOperacao, Integer indiceTransacao, String operacao, String itemDado, String timeStamp) {
+    public RecuperaInformacao(int idOperacao, int indiceTransacao, char operacao, String itemDado, String timeStamp, int flag) {
         this.idOperacao = idOperacao;
         this.indiceTransacao = indiceTransacao;
         this.operacao = operacao;
         this.itemDado = itemDado;
         this.timeStamp = timeStamp;
+        this.flag = flag;
     }
 
-    public Integer getIdOperacao() {
+    public int getIdOperacao() {
         return idOperacao;
     }
 
-    public void setIdOperacao(Integer idOperacao) {
+    public void setIdOperacao(int idOperacao) {
         this.idOperacao = idOperacao;
     }
 
-    public Integer getIndiceTransacao() {
+    public int getIndiceTransacao() {
         return indiceTransacao;
     }
 
-    public void setIndiceTransacao(Integer indiceTransacao) {
+    public void setIndiceTransacao(int indiceTransacao) {
         this.indiceTransacao = indiceTransacao;
     }
 
-    public String getOperacao() {
+    public char getOperacao() {
         return operacao;
     }
 
-    public void setOperacao(String operacao) {
+    public void setOperacao(char operacao) {
         this.operacao = operacao;
     }
 
@@ -62,5 +64,13 @@ public class RecuperaInformacao {
 
     public void setTimeStamp(String timeStamp) {
         this.timeStamp = timeStamp;
-    } 
+    }
+
+    public int getFlag() {
+        return flag;
+    }
+
+    public void setFlag(int flag) {
+        this.flag = flag;
+    }
 }
