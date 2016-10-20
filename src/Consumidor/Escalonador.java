@@ -5,7 +5,6 @@
  */
 package Consumidor;
 
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -17,8 +16,6 @@ import java.util.List;
  * @author elivelton
  */
 public class Escalonador {
-    PrintWriter writer;
-
     ArrayList<String> listaTransacao;
     ArrayList<String> dados;
     
@@ -32,7 +29,8 @@ public class Escalonador {
     public static final String statusDadoBloqueadoCompartilhado = "S";
     
     public List<RecuperaInformacao> informacoes = new ArrayList();
-    ConsumidorDao infoBD = new ConsumidorDao();
+    private ConsumidorDao infoBD = new ConsumidorDao();
+    private RecuperaInformacao recupera = null;
 
     public Escalonador() {
         filaTransacao = new LinkedList<>();
@@ -54,8 +52,8 @@ public class Escalonador {
                     solicitacaoBloqueio(statusDadoBloqueadoExclusivo, j.getTransacao(), j.getDado());
                 }
             }
-
-        } else {
+        }
+        else {
             for (ItemFila i : filaTransacao) {
                 if (i.getDado().equals(dado)) {
                     System.out.println("Despertando " + dado);
@@ -75,12 +73,13 @@ public class Escalonador {
     public void solicitacaoDesbloqueio(String transacao, String dado) {
         if (!dado.equals("infinito")) {
             System.out.println("Desbloqueando " + transacao + " / " + dado);
+
             if (estadoDadoCorrente.get(dado).getEstado() == 2) {
-                estadoDadoCorrente.get(dado).setEstado(0);//desbloqueia
+                estadoDadoCorrente.get(dado).setEstado(0);
                 despertarFila(dado);
-                //desperta a fila-wait(dado);
                 estadoDadoCorrente.get(dado).setEstado(1);
-            } else if (estadoDadoCorrente.get(dado).getEstado() == 1) {
+            }
+            else if (estadoDadoCorrente.get(dado).getEstado() == 1) {
                 listaTransacao.remove(dado);
                 if (listaTransacao.isEmpty()) {
                     estadoDadoCorrente.get(dado).setEstado(0);
@@ -92,57 +91,62 @@ public class Escalonador {
     }
 
     public void solicitacaoBloqueioCompartilhado(String transacao, String dado) {
-        System.out.println("Bloqueio compartilhado " + transacao + " / " + dado);
         if (estadoDadoCorrente.get(dado).getEstado() == 0) {
             if (estadoDadoCorrente.get(dado).getTransacao().equals(transacao)) {
-                writer.write("R" + transacao + "(" + dado + ")");
-                System.out.println("Conseguiu o bloqueio, esta desbloqueado" + "\n");
+                recupera = new RecuperaInformacao(Integer.parseInt(transacao), 'R', dado);
+                infoBD.insereTabela(recupera);
+                
                 listaTransacao.add(transacao);
+                
                 estadoDadoCorrente.get(dado).setEstado(1);
             }
-            writer.write("R" + transacao + "(" + dado + ")");
-            System.out.println("Conseguiu o bloqueio, esta desbloqueado" + "\n");
+            recupera = new RecuperaInformacao(Integer.parseInt(transacao), 'R', dado);
+            infoBD.insereTabela(recupera);
+
             listaTransacao.add(transacao);
             estadoDadoCorrente.get(dado).setEstado(1);
-
-        } else if (estadoDadoCorrente.get(dado).getEstado() == 1) {
+        }
+        else if (estadoDadoCorrente.get(dado).getEstado() == 1) {
             if (estadoDadoCorrente.get(dado).getTransacao().equals(transacao)) {
-                writer.write("R" + transacao + "(" + dado + ")");
-                System.out.println("Conseguiu o bloqueio, esta compartilhado" + "\n");
+                recupera = new RecuperaInformacao(Integer.parseInt(transacao), 'R', dado);
+                infoBD.insereTabela(recupera);
+                
                 listaTransacao.add(transacao);
             }
-            writer.write("R" + transacao + "(" + dado + ")");
-            System.out.println("Conseguiu o bloqueio, esta desbloqueado" + "\n");
+            recupera = new RecuperaInformacao(Integer.parseInt(transacao), 'R', dado);
+            infoBD.insereTabela(recupera);
+            
             listaTransacao.add(transacao);
             estadoDadoCorrente.get(dado).setEstado(1);
-        } else {
-            System.out.println("Nao Conseguiu, entrando pra fila");
+        }
+        else {
             ItemFila novoItemDaFila = new ItemFila(1, transacao, dado);
             filaTransacao.add(novoItemDaFila);
         }
     }
 
     public void solicitacaoBloqueioExclusivo(String transacao, String dado) {
-        System.out.println("Bloqueando Exclusivo " + transacao + " / " + dado);
         if (estadoDadoCorrente.get(dado).getEstado() == 0) {
-            writer.write("W" + transacao + "(" + dado + ")" + "\n");
-            System.out.println("Conseguiu o bloqueio");
+            recupera = new RecuperaInformacao(Integer.parseInt(transacao), 'W', dado);
+            infoBD.insereTabela(recupera);
+            
             listaTransacao.add(transacao);
+            
             estadoDadoCorrente.get(dado).setEstado(2);
-        } else if (estadoDadoCorrente.get(dado).getEstado() == 2
-                && estadoDadoCorrente.get(dado).getTransacao().equals(transacao)) {
-            writer.write("W" + transacao + "(" + dado + ")" + "\n");
-            System.out.println("Conseguiu o bloqueio");
+        }
+        else if (estadoDadoCorrente.get(dado).getEstado() == 2 && estadoDadoCorrente.get(dado).getTransacao().equals(transacao)){
+            recupera = new RecuperaInformacao(Integer.parseInt(transacao), 'W', dado);
+            infoBD.insereTabela(recupera);
+
             listaTransacao.add(transacao);
+
             estadoDadoCorrente.get(dado).setEstado(2);
-        } else if (estadoDadoCorrente.get(dado).getEstado() == 1
-                && estadoDadoCorrente.get(dado).getTransacao().equals(transacao)) {
-            System.out.println("Nao Conseguiu, entrando pra fila");
+        }
+        else if (estadoDadoCorrente.get(dado).getEstado() == 1 && estadoDadoCorrente.get(dado).getTransacao().equals(transacao)){
             ItemFila novoItemDaFila = new ItemFila(2, transacao, dado);
             filaTransacao.add(novoItemDaFila);
-//            filaDeTransacao.add(transacao);
-        } else {
-            System.out.println("Nao Conseguiu, entrando pra fila");
+        }
+        else {
             ItemFila novoItemDaFila = new ItemFila(2, transacao, dado);
             filaTransacao.add(novoItemDaFila);
         }
@@ -170,10 +174,7 @@ public class Escalonador {
         }
 
         for (int j=0; j < informacao.size(); j++) {
-            if ("S".equals(informacao.get(j).getOperacao())){
-                System.out.println("Comecou A transacao " + j);
-            }
-
+            System.out.println("Entrei!");
             if ("R".equals(informacao.get(j).getOperacao())) {
                 solicitacaoBloqueio(statusDadoBloqueadoCompartilhado, String.valueOf(informacao.get(j).getIndiceTransacao()), informacao.get(j).getItemDado());
             }
@@ -184,17 +185,17 @@ public class Escalonador {
 
             if ("E".equals(informacao.get(j).getOperacao())) {
                 solicitacaoDesbloqueio(String.valueOf(informacao.get(j).getIndiceTransacao()), "infinito");
-                verificarFila(String.valueOf(informacao.get(j).getIndiceTransacao()));
-                System.out.println("Commitou " + j);
+                verificarFila();
             }
         }
     }
 
-    private void verificarFila(String substring) {
+    private void verificarFila() {
         ItemFila first;
-        System.out.println(Arrays.toString(filaTransacao.toArray()));
+
         for (int i = 0; i < filaTransacao.size(); i++) {
             first = filaTransacao.get(i);
+
             if (estadoDadoCorrente.get(first.getDado()).getEstado() == 0) {
                 switch (first.getEstado()) {
                     case 1:

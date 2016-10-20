@@ -10,12 +10,12 @@ package Consumidor;
  * @author elivelton
  */
 public class RecuperaInformacao {
-    int idOperacao;
-    int indiceTransacao;
-    char operacao;
-    String itemDado;
-    String timeStamp;
-    int flag;
+    private int idOperacao;
+    private int indiceTransacao;
+    private char operacao;
+    private String itemDado;
+    private String timeStamp;
+    private int flag;
 
     public RecuperaInformacao(int idOperacao, int indiceTransacao, char operacao, String itemDado, String timeStamp, int flag) {
         this.idOperacao = idOperacao;
@@ -24,6 +24,12 @@ public class RecuperaInformacao {
         this.itemDado = itemDado;
         this.timeStamp = timeStamp;
         this.flag = flag;
+    }
+
+    public RecuperaInformacao(int indiceTransacao, char operacao, String itemDado) {
+        this.indiceTransacao = indiceTransacao;
+        this.operacao = operacao;
+        this.itemDado = itemDado;
     }
 
     public int getIdOperacao() {

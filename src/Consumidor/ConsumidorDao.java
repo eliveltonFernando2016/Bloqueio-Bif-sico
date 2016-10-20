@@ -9,7 +9,9 @@ import Produtor.MinhaConexao;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -45,6 +47,7 @@ public class ConsumidorDao {
                                                                  rs.getString("itemdado"),
                                                                  rs.getString("timestampj"),
                                                                  rs.getInt("flag"));
+                alteraFlag(info.getIdOperacao());
 
                 informacao.add(info);
             }
@@ -57,6 +60,25 @@ public class ConsumidorDao {
         return informacao;
     }
     
+    public void alteraFlag(int idOperacao){
+        minhaConexao = new MinhaConexao();
+        minhaConexao.getConnection();
+
+        Connection conn = minhaConexao.getConnection();
+        
+        try {
+            String sql = "UPDATE schedule SET flag = 1 WHERE ?";
+            PreparedStatement stm = conn.prepareStatement(sql);
+
+            stm.setInt(1, idOperacao);
+            stm.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally{
+            minhaConexao.desconexao(conn);
+        }
+    }
+
     public List<String> ItemDado(){
         List<String> informacao = new ArrayList();
 
@@ -111,5 +133,31 @@ public class ConsumidorDao {
         }
 
         return ultimoId;
+    }
+
+    public boolean insereTabela(RecuperaInformacao info){
+        boolean inseriu = false;
+        
+        minhaConexao = new MinhaConexao();
+        minhaConexao.getConnection();
+
+        Connection conn = minhaConexao.getConnection();
+        
+        try {
+            String sql = "INSERT INTO scheduleout(indiceTransacao, operacao, itemDado, timestampj) VALUES (?, ?, ?, ?)";
+            PreparedStatement stm = conn.prepareStatement(sql);
+
+            stm.setInt(1, info.getIndiceTransacao());
+            stm.setString(2, String.valueOf(info.getOperacao()));
+            stm.setString(3, String.valueOf(info.getItemDado()));
+            stm.setString(4, new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime()));
+            stm.executeUpdate();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally{
+            minhaConexao.desconexao(conn);
+        }
+
+        return inseriu;
     }
 }
