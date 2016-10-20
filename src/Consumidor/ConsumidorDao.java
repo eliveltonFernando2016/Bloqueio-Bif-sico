@@ -57,6 +57,37 @@ public class ConsumidorDao {
         return informacao;
     }
     
+    public List<String> ItemDado(){
+        List<String> informacao = new ArrayList();
+
+        minhaConexao = new MinhaConexao();
+        minhaConexao.getConnection();
+        
+        int ultimaOp = ultimoIdOperacao();
+        
+        Connection conn = minhaConexao.getConnection();
+
+        try {
+            String sql = "SELECT distinct itemdado FROM schedule WHERE (idoperacao >= ? AND idoperacao <= ?) AND itemdado IS NOT NULL";
+            PreparedStatement stm = conn.prepareStatement(sql);
+
+            stm.setInt(1, ultimaOp-50);
+            stm.setInt(2, ultimaOp);
+
+            ResultSet rs = stm.executeQuery();
+
+            while (rs.next()) {
+                informacao.add(rs.getString("itemdado"));
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+        } finally{
+            minhaConexao.desconexao(conn);
+        }
+
+        return informacao;
+    }
+    
     public int ultimoIdOperacao(){
         minhaConexao = new MinhaConexao();
         minhaConexao.getConnection();

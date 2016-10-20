@@ -69,7 +69,6 @@ public class Escalonador {
                     }
                 }
             }
-            //procurar por toda a fila quem esta primeiro e atender o chamado, executa;
         }
     }
 
@@ -93,7 +92,7 @@ public class Escalonador {
     }
 
     public void solicitacaoBloqueioCompartilhado(String transacao, String dado) {
-        System.out.println("Bloquando compartilhado " + transacao + " / " + dado);
+        System.out.println("Bloqueio compartilhado " + transacao + " / " + dado);
         if (estadoDadoCorrente.get(dado).getEstado() == 0) {
             if (estadoDadoCorrente.get(dado).getTransacao().equals(transacao)) {
                 writer.write("R" + transacao + "(" + dado + ")");
@@ -120,7 +119,6 @@ public class Escalonador {
             System.out.println("Nao Conseguiu, entrando pra fila");
             ItemFila novoItemDaFila = new ItemFila(1, transacao, dado);
             filaTransacao.add(novoItemDaFila);
-
         }
     }
 
@@ -160,61 +158,34 @@ public class Escalonador {
 
     public void escalonar() {
         List<RecuperaInformacao> informacao = infoBD.ConsumoLote();
-        String[] scheduleStr = null;
-        String schedule = null;
+        List<String> itemDado = infoBD.ItemDado();
 
-        for(int i=0; i < informacao.size(); i++){
-            if(i==0){
-                schedule = String.valueOf(informacao.get(i).getOperacao());
-            }
-            else{
-                try {
-                    schedule = schedule.concat(String.valueOf(informacao.get(i).getOperacao()));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-            
-            try {
-                schedule = schedule.concat(String.valueOf(informacao.get(i).getIndiceTransacao()));
-            } catch(Exception e){
-                e.printStackTrace();
-            }
-
-            if(!("E".equals(String.valueOf(informacao.get(i).getOperacao())) || "S".equals(String.valueOf(informacao.get(i).getIdOperacao())))){
-                try {
-                    schedule = schedule.concat(String.valueOf(informacao.get(i).getItemDado()));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-            schedule = schedule.concat(", ");
+        for(int i=0; i < itemDado.size(); i++){
+            dados.add(itemDado.get(i));
         }
 
-        scheduleStr = schedule.split(", ");
-
+        EstadoDado item = new EstadoDado("", 0);
         for (String dado : dados) {
-            System.out.println(dado + "NOVO");
-            EstadoDado item = new EstadoDado("", 0);
             estadoDadoCorrente.put(dado, item);
         }
 
-        for (String j : scheduleStr) {
-            //verifica se comeca uma transacao;
-            if (j.substring(0, 1).equals("S")) {
-                //comeca transacao
+        for (int j=0; j < informacao.size(); j++) {
+            if ("S".equals(informacao.get(j).getOperacao())){
                 System.out.println("Comecou A transacao " + j);
             }
-            if (j.substring(0, 1).equals("E")) {
-                solicitacaoDesbloqueio(j.substring(1, 2), "infinito");
-                verificarFila(j.substring(1, 2));
+
+            if ("R".equals(informacao.get(j).getOperacao())) {
+                solicitacaoBloqueio(statusDadoBloqueadoCompartilhado, String.valueOf(informacao.get(j).getIndiceTransacao()), informacao.get(j).getItemDado());
+            }
+
+            if ("W".equals(informacao.get(j).getOperacao())) {
+                solicitacaoBloqueio(statusDadoBloqueadoExclusivo, String.valueOf(informacao.get(j).getIndiceTransacao()), informacao.get(j).getItemDado());
+            }
+
+            if ("E".equals(informacao.get(j).getOperacao())) {
+                solicitacaoDesbloqueio(String.valueOf(informacao.get(j).getIndiceTransacao()), "infinito");
+                verificarFila(String.valueOf(informacao.get(j).getIndiceTransacao()));
                 System.out.println("Commitou " + j);
-            }
-            if (j.substring(0, 1).equals("R")) {
-                solicitacaoBloqueio(statusDadoBloqueadoCompartilhado, j.substring(1, 2), j.substring(3, 4));
-            }
-            if (j.substring(0, 1).equals("W")) {
-                solicitacaoBloqueio(statusDadoBloqueadoExclusivo, j.substring(1, 2), j.substring(3, 4));
             }
         }
     }
