@@ -1,6 +1,5 @@
 package Produtor;
 
-import Consumidor.Escalonador;
 import java.util.Scanner;
 
 public class Main {
@@ -9,7 +8,7 @@ public class Main {
     private static int numeroAcessos = 9;
     private static Scanner scanner;
 
-    public static void main(String[] args) {       
+    public static void main(String[] args) {
         scanner = new Scanner(System.in);
         System.out.println( "Criando transacoes e gravando no banco..." );
         Produtor produtor = new Produtor(numeroItens, numeroTransacoes, numeroAcessos);
@@ -20,8 +19,5 @@ public class Main {
             System.out.println("Producao encerrada");
             produtor.setFlag(false);
         }
-
-        Escalonador escalonador = new Escalonador();
-        escalonador.escalonar();
     }
 }

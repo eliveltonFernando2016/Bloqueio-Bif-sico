@@ -32,7 +32,7 @@ public class Escalonador {
     public static final String statusDadoBloqueadoCompartilhado = "S";
     
     public List<RecuperaInformacao> informacoes = new ArrayList();
-    RecuperaInformacaoBd infoBD = new RecuperaInformacaoBd();
+    ConsumidorDao infoBD = new ConsumidorDao();
 
     public Escalonador() {
         filaTransacao = new LinkedList<>();
@@ -72,56 +72,6 @@ public class Escalonador {
             //procurar por toda a fila quem esta primeiro e atender o chamado, executa;
         }
     }
-
-    /*void executar(String arquivotxt) throws FileNotFoundException, IOException {
-        FileReader file = new FileReader(new File(arquivotxt));
-        BufferedReader buffer = new BufferedReader(file);
-        String linha;
-        int numeroLinhas = 0;
-        int numeroItensDados = 0;
-        int numeroTransacoes = 0;
-        int numeroAcessos = 0;
-        String[] s;
-
-        String l;
-        String[] schedule = null;
-        while ((linha = buffer.readLine()) != null) {
-            numeroLinhas++;
-            System.out.println(linha);
-            if (numeroLinhas == 1) {
-                s = linha.split(", ");
-                numeroItensDados = s.length;
-                numeroTransacoes = Integer.parseInt(s[1]);
-                numeroAcessos = Integer.parseInt(s[2]);
-            } else if (numeroLinhas == 2) {
-                linha = linha.replace("Dados: [", "");
-                linha = linha.replace("]", "");
-                s = linha.split(", ");
-                for (int i = 0; i < s.length; i++) {
-                    System.out.println(s[i] + "DADO");
-                    dados.add(s[i]);
-                }
-            } else if (numeroLinhas == 3 && numeroLinhas < 3 + numeroTransacoes) {
-                //transacoes
-            } else {
-                //escalonador;
-                l = linha.replace("schedule: [", "");
-                l = l.replace("]", "");
-                schedule = linha.split(", ");
-            }
-        }
-        escalonar(schedule);
-        int verif = 0;
-        while (!filaTransacao.isEmpty()) {
-            if (verif < 500) {
-                despertarFila("");
-                verif++;
-            } else {
-                System.out.println("Deadlock Encontrado");
-                break;
-            }
-        }
-    }*/
 
     public void solicitacaoDesbloqueio(String transacao, String dado) {
         if (!dado.equals("infinito")) {
@@ -209,64 +159,64 @@ public class Escalonador {
     }
 
     public void escalonar() {
-        informacoes = infoBD.selectBD();
-
+        List<RecuperaInformacao> informacao = infoBD.ConsumoLote();
+        String[] scheduleStr = null;
         String schedule = null;
 
-        for(int i=0; i < informacoes.size(); i++){
+        for(int i=0; i < informacao.size(); i++){
             if(i==0){
-                schedule = String.valueOf(informacoes.get(i).getOperacao());
+                schedule = String.valueOf(informacao.get(i).getOperacao());
             }
             else{
-                schedule = schedule.concat(String.valueOf(informacoes.get(i).getOperacao()));
+                try {
+                    schedule = schedule.concat(String.valueOf(informacao.get(i).getOperacao()));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
             
-            schedule = schedule.concat(String.valueOf(informacoes.get(i).getIndiceTransacao()));
-            
-            if(!("E".equals(informacoes.get(i).getOperacao()) || "S".equals(informacoes.get(i).getOperacao()))){
-                schedule = schedule.concat("(");
-                schedule = schedule.concat(informacoes.get(i).getItemDado());
-                schedule = schedule.concat(")");
+            try {
+                schedule = schedule.concat(String.valueOf(informacao.get(i).getIndiceTransacao()));
+            } catch(Exception e){
+                e.printStackTrace();
             }
-            
+
+            if(!("E".equals(String.valueOf(informacao.get(i).getOperacao())) || "S".equals(String.valueOf(informacao.get(i).getIdOperacao())))){
+                try {
+                    schedule = schedule.concat(String.valueOf(informacao.get(i).getItemDado()));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
             schedule = schedule.concat(", ");
         }
 
-        System.out.println(schedule);
-        /*for (String dado : dados) {
-        System.out.println(dado + "NOVO");
-        EstadoDado item = new EstadoDado("", 0);
-        estadoDadoCorrente.put(dado, item);
+        scheduleStr = schedule.split(", ");
+
+        for (String dado : dados) {
+            System.out.println(dado + "NOVO");
+            EstadoDado item = new EstadoDado("", 0);
+            estadoDadoCorrente.put(dado, item);
         }
-        for (String i : schedule) {
-        //verifica se comeca uma transacao;
-        if (i.substring(0, 1).equals("S")) {
-        //comeca transacao
-        System.out.println("Comecou A transacao " + i);
-        writer.write(i + "\n");
+
+        for (String j : scheduleStr) {
+            //verifica se comeca uma transacao;
+            if (j.substring(0, 1).equals("S")) {
+                //comeca transacao
+                System.out.println("Comecou A transacao " + j);
+            }
+            if (j.substring(0, 1).equals("E")) {
+                solicitacaoDesbloqueio(j.substring(1, 2), "infinito");
+                verificarFila(j.substring(1, 2));
+                System.out.println("Commitou " + j);
+            }
+            if (j.substring(0, 1).equals("R")) {
+                solicitacaoBloqueio(statusDadoBloqueadoCompartilhado, j.substring(1, 2), j.substring(3, 4));
+            }
+            if (j.substring(0, 1).equals("W")) {
+                solicitacaoBloqueio(statusDadoBloqueadoExclusivo, j.substring(1, 2), j.substring(3, 4));
+            }
         }
-        if (i.substring(0, 1).equals("E")) {
-        writer.write(i + "\n");
-        //tem q ver se num tem nada na fila;
-        //termina transacao
-        solicitacaoDesbloqueio(i.substring(1, 2), "infinito");
-        verificarFila(i.substring(1, 2));
-        System.out.println("Commitou " + i);
-        }
-        if (i.substring(0, 1).equals("R")) {
-        //solicita bloqueio compartilhado
-        System.out.println(i.substring(1, 2));
-        System.out.println(i.substring(3, 4));
-        solicitacaoBloqueio(statusDadoBloqueadoCompartilhado, i.substring(1, 2), i.substring(3, 4));
-        }
-        if (i.substring(0, 1).equals("W")) {
-        //solicita bloqueio exclusivo
-        System.out.println(i.substring(1, 2));
-        System.out.println(i.substring(3, 4));
-        solicitacaoBloqueio(statusDadoBloqueadoExclusivo, i.substring(1, 2), i.substring(3, 4));
-        }
-        }
-        writer.close();*/
     }
 
     private void verificarFila(String substring) {
@@ -286,4 +236,5 @@ public class Escalonador {
             }
         }
     }
+
 }

@@ -1,5 +1,8 @@
 package Produtor;
 
+import Consumidor.Escalonador;
+import Consumidor.ConsumidorDao;
+
 public class Produtor extends Thread {
     private Thread t;
     private int numeroItens;
@@ -7,6 +10,8 @@ public class Produtor extends Thread {
     private int numeroAcessos;
     private static GerenciadorTransacao gerenciador;
     private boolean flag = true;
+    
+    ConsumidorDao recupera = new ConsumidorDao();
 	
     public Produtor(int numeroItens, int numeroTransacoes, int numeroAcessos) {
         this.numeroItens = numeroItens;
@@ -17,11 +22,14 @@ public class Produtor extends Thread {
     public void run() {
         int ultimoIndice = 0;
         //Criando transacoes e gravando no banco
+        Escalonador escalonador = new Escalonador();
+        recupera.ultimoIdOperacao();
         try {
             do {
                 ultimoIndice = TransacaoDao.pegarUltimoIndice();
                 gerenciador = new GerenciadorTransacao(numeroItens, numeroTransacoes, numeroAcessos, ultimoIndice);
                 Schedule schedule = new Schedule(gerenciador.getListaTransacoes());
+                escalonador.escalonar();
                 TransacaoDao.gravarTransacoes(schedule);
                 Thread.sleep( 3 * 1000 );
             } while(flag);

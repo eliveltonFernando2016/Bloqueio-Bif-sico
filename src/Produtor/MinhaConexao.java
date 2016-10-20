@@ -78,4 +78,14 @@ public class MinhaConexao {
             e.printStackTrace();
         }
     }
+
+    public void desconexao(Connection conn){
+        try {
+            if (conn != null) {
+               conn.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }

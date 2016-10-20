@@ -48,7 +48,7 @@ public class TransacaoDao {
         int ultimoIndice = 0;
         minhaConexao = new MinhaConexao();
         Connection conn = minhaConexao.getConnection();
-        String sql = "SELECT MAX(indiceTransacao) FROM schedule;";
+        String sql = "SELECT MAX(indiceTransacao) FROM schedule";
 
         try {
             PreparedStatement stmt = conn.prepareStatement(sql);
