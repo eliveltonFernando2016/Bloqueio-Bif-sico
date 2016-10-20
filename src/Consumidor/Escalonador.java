@@ -6,7 +6,6 @@
 package Consumidor;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -174,7 +173,6 @@ public class Escalonador {
         }
 
         for (int j=0; j < informacao.size(); j++) {
-            System.out.println("Entrei!");
             if ("R".equals(informacao.get(j).getOperacao())) {
                 solicitacaoBloqueio(statusDadoBloqueadoCompartilhado, String.valueOf(informacao.get(j).getIndiceTransacao()), informacao.get(j).getItemDado());
             }

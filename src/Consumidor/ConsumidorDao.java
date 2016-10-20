@@ -67,7 +67,7 @@ public class ConsumidorDao {
         Connection conn = minhaConexao.getConnection();
         
         try {
-            String sql = "UPDATE schedule SET flag = 1 WHERE ?";
+            String sql = "UPDATE schedule SET flag = 1 WHERE idoperacao = ?";
             PreparedStatement stm = conn.prepareStatement(sql);
 
             stm.setInt(1, idOperacao);
@@ -151,6 +151,7 @@ public class ConsumidorDao {
             stm.setString(2, String.valueOf(info.getOperacao()));
             stm.setString(3, String.valueOf(info.getItemDado()));
             stm.setString(4, new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime()));
+            
             stm.executeUpdate();
         } catch (Exception e) {
             e.printStackTrace();
