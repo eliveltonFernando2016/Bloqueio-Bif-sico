@@ -138,6 +138,8 @@ public class ConsumidorDao {
     public boolean insereTabela(RecuperaInformacao info){
         boolean inseriu = false;
         
+        System.out.println("Meu idoperacao: "+info.getIdOperacao());
+        
         minhaConexao = new MinhaConexao();
         minhaConexao.getConnection();
 
@@ -153,6 +155,7 @@ public class ConsumidorDao {
             stm.setString(4, new SimpleDateFormat("yyyyMMdd_HHmmss").format(Calendar.getInstance().getTime()));
             
             stm.executeUpdate();
+            inseriu = true;
         } catch (Exception e) {
             e.printStackTrace();
         } finally{

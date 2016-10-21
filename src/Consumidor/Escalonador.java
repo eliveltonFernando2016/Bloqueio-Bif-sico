@@ -71,8 +71,6 @@ public class Escalonador {
 
     public void solicitacaoDesbloqueio(String transacao, String dado) {
         if (!dado.equals("infinito")) {
-            System.out.println("Desbloqueando " + transacao + " / " + dado);
-
             if (estadoDadoCorrente.get(dado).getEstado() == 2) {
                 estadoDadoCorrente.get(dado).setEstado(0);
                 despertarFila(dado);
@@ -82,7 +80,6 @@ public class Escalonador {
                 listaTransacao.remove(dado);
                 if (listaTransacao.isEmpty()) {
                     estadoDadoCorrente.get(dado).setEstado(0);
-                    //desperta a fila-wait(dado);
                     despertarFila(dado);
                 }
             }
@@ -173,15 +170,15 @@ public class Escalonador {
         }
 
         for (int j=0; j < informacao.size(); j++) {
-            if ("R".equals(informacao.get(j).getOperacao())) {
+            if ("R".equals(String.valueOf(informacao.get(j).getOperacao()))){
                 solicitacaoBloqueio(statusDadoBloqueadoCompartilhado, String.valueOf(informacao.get(j).getIndiceTransacao()), informacao.get(j).getItemDado());
             }
 
-            if ("W".equals(informacao.get(j).getOperacao())) {
+            if ("W".equals(String.valueOf(informacao.get(j).getOperacao()))){
                 solicitacaoBloqueio(statusDadoBloqueadoExclusivo, String.valueOf(informacao.get(j).getIndiceTransacao()), informacao.get(j).getItemDado());
             }
 
-            if ("E".equals(informacao.get(j).getOperacao())) {
+            if ("E".equals(String.valueOf(informacao.get(j).getOperacao()))){
                 solicitacaoDesbloqueio(String.valueOf(informacao.get(j).getIndiceTransacao()), "infinito");
                 verificarFila();
             }

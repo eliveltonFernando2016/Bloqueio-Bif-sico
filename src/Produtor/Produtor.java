@@ -21,7 +21,7 @@ public class Produtor extends Thread {
 	
     public void run() {
         int ultimoIndice = 0;
-        //Criando transacoes e gravando no banco
+
         Escalonador escalonador = new Escalonador();
         recupera.ultimoIdOperacao();
         try {
@@ -29,8 +29,8 @@ public class Produtor extends Thread {
                 ultimoIndice = TransacaoDao.pegarUltimoIndice();
                 gerenciador = new GerenciadorTransacao(numeroItens, numeroTransacoes, numeroAcessos, ultimoIndice);
                 Schedule schedule = new Schedule(gerenciador.getListaTransacoes());
-                escalonador.escalonar();
                 TransacaoDao.gravarTransacoes(schedule);
+                escalonador.escalonar();
                 Thread.sleep( 3 * 1000 );
             } while(flag);
         }catch (InterruptedException e) {
