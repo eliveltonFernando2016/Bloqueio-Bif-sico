@@ -5,6 +5,10 @@
  */
 package Consumidor;
 
+import Model.RecuperaInformacao;
+import Model.ItemFila;
+import Model.EstadoDado;
+import DAO.ConsumidorDao;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;

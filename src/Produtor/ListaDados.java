@@ -1,5 +1,6 @@
 package Produtor;
 
+import Model.Dado;
 import java.util.LinkedList;
 
 public class ListaDados {

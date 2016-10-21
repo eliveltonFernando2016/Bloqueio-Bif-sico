@@ -1,4 +1,4 @@
-package Produtor;
+package Model;
 
 public class Dado {
     private String nome;

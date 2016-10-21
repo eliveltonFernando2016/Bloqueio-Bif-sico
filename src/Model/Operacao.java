@@ -1,4 +1,7 @@
-package Produtor;
+package Model;
+
+import Model.Acesso;
+import Model.Dado;
 
 public class Operacao {
     private Acesso acesso;

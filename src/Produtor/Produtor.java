@@ -1,7 +1,8 @@
 package Produtor;
 
+import DAO.TransacaoDao;
 import Consumidor.Escalonador;
-import Consumidor.ConsumidorDao;
+import DAO.ConsumidorDao;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -13,15 +14,15 @@ public class Produtor extends Thread {
     private int numeroAcessos;
     private static GerenciadorTransacao gerenciador;
     private boolean flag = true;
-    
+
     ConsumidorDao recupera = new ConsumidorDao();
-	
+
     public Produtor(int numeroItens, int numeroTransacoes, int numeroAcessos) {
         this.numeroItens = numeroItens;
         this.numeroTransacoes = numeroTransacoes;
         this.numeroAcessos = numeroAcessos;
     }
-	
+
     public void run() {
         int ultimoIndice = 0;
 
@@ -41,11 +42,11 @@ public class Produtor extends Thread {
             Logger.getLogger(Produtor.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-	
+
     public void setFlag(boolean state) {
         this.flag = state;
     }
-	
+
     public void start() {
 	if (t == null) {
             t = new Thread (this);

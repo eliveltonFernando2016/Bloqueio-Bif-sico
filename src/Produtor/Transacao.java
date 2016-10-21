@@ -1,5 +1,8 @@
 package Produtor;
 
+import Model.Operacao;
+import Model.Acesso;
+import Model.Dado;
 import java.util.LinkedList;
 import java.util.Random;
 import java.util.stream.IntStream;

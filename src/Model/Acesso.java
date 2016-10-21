@@ -1,4 +1,4 @@
-package Produtor;
+package Model;
 
 public enum Acesso {
     READ("R"),
@@ -7,7 +7,7 @@ public enum Acesso {
     END("E"),
     COMMIT("C"),
     ABORT("A");
-    String texto;
+    public String texto;
 
     private Acesso(String texto) {
         this.texto = texto;

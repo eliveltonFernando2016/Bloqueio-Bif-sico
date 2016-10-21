@@ -1,5 +1,7 @@
-package Produtor;
+package DAO;
 
+import Model.Operacao;
+import Produtor.Schedule;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
