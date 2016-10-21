@@ -28,35 +28,38 @@ public class MinhaConexao {
             throw new RuntimeException(ex);
         }
     }
-	
+
     public void release( PreparedStatement stmt ) throws SQLException{
-    	if( stmt != null && !stmt.isClosed())
+    	if( stmt != null && !stmt.isClosed()){
             try {
                 stmt.close();
                 stmt = null;
             } catch (SQLException ex) {
                 Logger.getLogger(MinhaConexao.class.getName()).log(Level.SEVERE, null, ex);
-            }	
+            }
+        }
     }
    
     public void release( Connection conn ) throws SQLException{
-    	if( conn != null  && !conn.isClosed())
+    	if( conn != null  && !conn.isClosed()){
             try {
                 conn.close();
                 conn = null;
             } catch (SQLException ex) {
                 Logger.getLogger(MinhaConexao.class.getName()).log(Level.SEVERE, null, ex);
             }
+        }
     }
     
     public void release( ResultSet rs ) throws SQLException{
-    	if( rs != null &&  !rs.isClosed())
+    	if( rs != null &&  !rs.isClosed()){
             try {
                 rs.close();
             } catch (SQLException ex) {
                 Logger.getLogger(MinhaConexao.class.getName()).log(Level.SEVERE, null, ex);
             }
-  	}
+        }
+    }
     
     public void releaseAll( PreparedStatement stmt, Connection conn ) throws SQLException{
     	release(stmt);
@@ -75,16 +78,6 @@ public class MinhaConexao {
             conn.close();
         } catch (SQLException e) {
             // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-    }
-
-    public void desconexao(Connection conn){
-        try {
-            if (conn != null) {
-               conn.close();
-            }
-        } catch (Exception e) {
             e.printStackTrace();
         }
     }

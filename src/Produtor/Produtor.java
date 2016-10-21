@@ -2,6 +2,9 @@ package Produtor;
 
 import Consumidor.Escalonador;
 import Consumidor.ConsumidorDao;
+import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Produtor extends Thread {
     private Thread t;
@@ -23,18 +26,19 @@ public class Produtor extends Thread {
         int ultimoIndice = 0;
 
         Escalonador escalonador = new Escalonador();
-        recupera.ultimoIdOperacao();
         try {
             do {
                 ultimoIndice = TransacaoDao.pegarUltimoIndice();
                 gerenciador = new GerenciadorTransacao(numeroItens, numeroTransacoes, numeroAcessos, ultimoIndice);
                 Schedule schedule = new Schedule(gerenciador.getListaTransacoes());
                 TransacaoDao.gravarTransacoes(schedule);
-                escalonador.escalonar();
+                escalonador.run();
                 Thread.sleep( 3 * 1000 );
             } while(flag);
         }catch (InterruptedException e) {
             e.printStackTrace();
+        } catch (SQLException ex) {
+            Logger.getLogger(Produtor.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 	

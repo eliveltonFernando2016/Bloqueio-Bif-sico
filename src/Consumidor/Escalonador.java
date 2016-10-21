@@ -5,16 +5,21 @@
  */
 package Consumidor;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author elivelton
  */
-public class Escalonador {
+public class Escalonador extends Thread{
+    Thread th;
+    
     ArrayList<String> listaTransacao;
     ArrayList<String> dados;
     
@@ -38,7 +43,35 @@ public class Escalonador {
         estadoDadoCorrente = new HashMap<>();
     }
 
-    public void despertarFila(String dado) {
+    //solicitacaoBloqueio(tipoBloquio, indicetransacao, operacao)
+    public void solicitacaoBloqueio(String status, String transacao, String dado) throws SQLException {
+        if (status.equals(statusDadoBloqueadoCompartilhado)) {
+            lockS(dado, transacao);
+        } else {
+            lockX(dado, transacao);
+        }
+    }
+
+    //solicitacaoDesbloqueio(indicetransacao, operacao)
+    public void solicitacaoDesbloqueio(String transacao, String dado) throws SQLException {
+        if (!dado.equals("infinito")) {
+            if (estadoDadoCorrente.get(dado).getEstado() == 2) {
+                estadoDadoCorrente.get(dado).setEstado(0);
+                despertarFila(dado);
+                estadoDadoCorrente.get(dado).setEstado(1);
+            }
+            else if (estadoDadoCorrente.get(dado).getEstado() == 1) {
+                listaTransacao.remove(dado);
+                if (listaTransacao.isEmpty()) {
+                    estadoDadoCorrente.get(dado).setEstado(0);
+                    despertarFila(dado);
+                }
+            }
+        }
+    }
+
+    //despertarFila(operacao)
+    public void despertarFila(String dado) throws SQLException {
         if (dado.equals("")) {
             for (int i = 0; i < filaTransacao.size(); i++) {
                 ItemFila j = filaTransacao.get(i);
@@ -69,24 +102,8 @@ public class Escalonador {
         }
     }
 
-    public void solicitacaoDesbloqueio(String transacao, String dado) {
-        if (!dado.equals("infinito")) {
-            if (estadoDadoCorrente.get(dado).getEstado() == 2) {
-                estadoDadoCorrente.get(dado).setEstado(0);
-                despertarFila(dado);
-                estadoDadoCorrente.get(dado).setEstado(1);
-            }
-            else if (estadoDadoCorrente.get(dado).getEstado() == 1) {
-                listaTransacao.remove(dado);
-                if (listaTransacao.isEmpty()) {
-                    estadoDadoCorrente.get(dado).setEstado(0);
-                    despertarFila(dado);
-                }
-            }
-        }
-    }
-
-    public void solicitacaoBloqueioCompartilhado(String transacao, String dado) {
+    //solicitacaoBloqueioCompartilhado(operacao, indicetransacao)
+    public void lockS(String dado, String transacao) throws SQLException {
         if (estadoDadoCorrente.get(dado).getEstado() == 0) {
             if (estadoDadoCorrente.get(dado).getTransacao().equals(transacao)) {
                 recupera = new RecuperaInformacao(Integer.parseInt(transacao), 'R', dado);
@@ -121,7 +138,8 @@ public class Escalonador {
         }
     }
 
-    public void solicitacaoBloqueioExclusivo(String transacao, String dado) {
+    //solicitacaoBloqueioExclusivo(operacao, indicetransacao)
+    public void lockX(String dado, String transacao) throws SQLException {
         if (estadoDadoCorrente.get(dado).getEstado() == 0) {
             recupera = new RecuperaInformacao(Integer.parseInt(transacao), 'W', dado);
             infoBD.insereTabela(recupera);
@@ -148,17 +166,20 @@ public class Escalonador {
         }
     }
 
-    public void solicitacaoBloqueio(String status, String transacao, String dado) {
-        if (status.equals(statusDadoBloqueadoCompartilhado)) {
-            solicitacaoBloqueioCompartilhado(transacao, dado);
-        } else {
-            solicitacaoBloqueioExclusivo(transacao, dado);
+    @Override
+    public void run(){
+        List<RecuperaInformacao> informacao = null;
+        try {
+            informacao = infoBD.ConsumoLote();
+        } catch (SQLException ex) {
+            Logger.getLogger(Escalonador.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }
-
-    public void escalonar() {
-        List<RecuperaInformacao> informacao = infoBD.ConsumoLote();
-        List<String> itemDado = infoBD.ItemDado();
+        List<String> itemDado = null;
+        try {
+            itemDado = infoBD.ItemDado();
+        } catch (SQLException ex) {
+            Logger.getLogger(Escalonador.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
         for(int i=0; i < itemDado.size(); i++){
             dados.add(itemDado.get(i));
@@ -171,21 +192,33 @@ public class Escalonador {
 
         for (int j=0; j < informacao.size(); j++) {
             if ("R".equals(String.valueOf(informacao.get(j).getOperacao()))){
-                solicitacaoBloqueio(statusDadoBloqueadoCompartilhado, String.valueOf(informacao.get(j).getIndiceTransacao()), informacao.get(j).getItemDado());
+                try {
+                    solicitacaoBloqueio(statusDadoBloqueadoCompartilhado, String.valueOf(informacao.get(j).getIndiceTransacao()), informacao.get(j).getItemDado());
+                } catch (SQLException ex) {
+                    Logger.getLogger(Escalonador.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
 
             if ("W".equals(String.valueOf(informacao.get(j).getOperacao()))){
-                solicitacaoBloqueio(statusDadoBloqueadoExclusivo, String.valueOf(informacao.get(j).getIndiceTransacao()), informacao.get(j).getItemDado());
+                try {
+                    solicitacaoBloqueio(statusDadoBloqueadoExclusivo, String.valueOf(informacao.get(j).getIndiceTransacao()), informacao.get(j).getItemDado());
+                } catch (SQLException ex) {
+                    Logger.getLogger(Escalonador.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
 
             if ("E".equals(String.valueOf(informacao.get(j).getOperacao()))){
-                solicitacaoDesbloqueio(String.valueOf(informacao.get(j).getIndiceTransacao()), "infinito");
-                verificarFila();
+                try {
+                    solicitacaoDesbloqueio(String.valueOf(informacao.get(j).getIndiceTransacao()), "infinito");
+                    verificarFila();
+                } catch (SQLException ex) {
+                    Logger.getLogger(Escalonador.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         }
     }
 
-    private void verificarFila() {
+    private void verificarFila() throws SQLException {
         ItemFila first;
 
         for (int i = 0; i < filaTransacao.size(); i++) {
@@ -204,4 +237,11 @@ public class Escalonador {
         }
     }
 
+    @Override
+    public void start() {
+	if (th == null) {
+            th = new Thread (this);
+            th.start ();
+        }
+    }
 }

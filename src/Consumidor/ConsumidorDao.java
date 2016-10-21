@@ -9,6 +9,7 @@ import Produtor.MinhaConexao;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -22,16 +23,24 @@ public class ConsumidorDao {
     private static MinhaConexao minhaConexao;
     public int ultimoIndice = 0;
 
-    public List<RecuperaInformacao> ConsumoLote(){
+    public List<RecuperaInformacao> ConsumoLote() throws SQLException{
         List<RecuperaInformacao> informacao = new ArrayList();
 
         minhaConexao = new MinhaConexao();
         minhaConexao.getConnection();
 
-        int ultimaOp = ultimoIdOperacao();
+        int ultimaOp = 0;
 
         Connection conn = minhaConexao.getConnection();
         try {
+            String sqlUltimoId = "SELECT MAX(idoperacao) FROM schedule WHERE flag <> 2";
+            PreparedStatement stmt = conn.prepareStatement(sqlUltimoId);
+
+            ResultSet rst = stmt.executeQuery();
+
+            rst.next();
+            ultimaOp = rst.getInt(1);
+
             String sql = "SELECT * FROM schedule WHERE idoperacao >= ? AND idoperacao <= ?";
             PreparedStatement stm = conn.prepareStatement(sql);
 
@@ -47,20 +56,20 @@ public class ConsumidorDao {
                                                                  rs.getString("itemdado"),
                                                                  rs.getString("timestampj"),
                                                                  rs.getInt("flag"));
-                alteraFlag(info.getIdOperacao());
+                //alteraFlag(info.getIdOperacao());
 
                 informacao.add(info);
             }
         }catch(Exception e){
             e.printStackTrace();
         } finally{
-            minhaConexao.desconexao(conn);
+            minhaConexao.release(conn);
         }
 
         return informacao;
     }
     
-    public void alteraFlag(int idOperacao){
+    public void alteraFlag(int idOperacao) throws SQLException{
         minhaConexao = new MinhaConexao();
         minhaConexao.getConnection();
 
@@ -75,21 +84,29 @@ public class ConsumidorDao {
         } catch (Exception e) {
             e.printStackTrace();
         } finally{
-            minhaConexao.desconexao(conn);
+            minhaConexao.release(conn);
         }
     }
 
-    public List<String> ItemDado(){
+    public List<String> ItemDado() throws SQLException{
         List<String> informacao = new ArrayList();
 
         minhaConexao = new MinhaConexao();
         minhaConexao.getConnection();
         
-        int ultimaOp = ultimoIdOperacao();
+        int ultimaOp = 0;
         
         Connection conn = minhaConexao.getConnection();
 
         try {
+            String sqlUltimoId = "SELECT MAX(idoperacao) FROM schedule WHERE flag <> 2";
+            PreparedStatement stmt = conn.prepareStatement(sqlUltimoId);
+
+            ResultSet rst = stmt.executeQuery();
+
+            rst.next();
+            ultimaOp = rst.getInt(1);
+
             String sql = "SELECT distinct itemdado FROM schedule WHERE (idoperacao >= ? AND idoperacao <= ?) AND itemdado IS NOT NULL";
             PreparedStatement stm = conn.prepareStatement(sql);
 
@@ -104,41 +121,14 @@ public class ConsumidorDao {
         }catch(Exception e){
             e.printStackTrace();
         } finally{
-            minhaConexao.desconexao(conn);
+            minhaConexao.release(conn);
         }
 
         return informacao;
     }
-    
-    public int ultimoIdOperacao(){
-        minhaConexao = new MinhaConexao();
-        minhaConexao.getConnection();
 
-        Connection conn = minhaConexao.getConnection();
-
-        int ultimoId = 0;
-
-        try {
-            String sql = "SELECT MAX(idoperacao) FROM schedule WHERE flag <> 2";
-            PreparedStatement stm = conn.prepareStatement(sql);
-
-            ResultSet rs = stm.executeQuery();
-
-            rs.next();
-            ultimoId = rs.getInt(1);
-        } catch (Exception e) {
-            e.printStackTrace();
-        } finally{
-            minhaConexao.desconexao(conn);
-        }
-
-        return ultimoId;
-    }
-
-    public boolean insereTabela(RecuperaInformacao info){
+    public boolean insereTabela(RecuperaInformacao info) throws SQLException{
         boolean inseriu = false;
-        
-        System.out.println("Meu idoperacao: "+info.getIdOperacao());
         
         minhaConexao = new MinhaConexao();
         minhaConexao.getConnection();
@@ -159,7 +149,7 @@ public class ConsumidorDao {
         } catch (Exception e) {
             e.printStackTrace();
         } finally{
-            minhaConexao.desconexao(conn);
+            minhaConexao.release(conn);
         }
 
         return inseriu;
