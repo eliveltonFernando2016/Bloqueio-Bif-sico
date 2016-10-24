@@ -67,8 +67,4 @@ public class TransacaoDao {
         }
         return ultimoIndice;
     }
-    
-    public void buscarTransacoes(){
-        
-    }
 }

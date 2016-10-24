@@ -40,14 +40,14 @@ public class MinhaConexao {
         }
     }
    
-    public void release( Connection conn ) throws SQLException{
-    	if( conn != null  && !conn.isClosed()){
-            try {
+    public void release( Connection conn ){
+        try {
+            if( conn != null  && !conn.isClosed()){
                 conn.close();
                 conn = null;
-            } catch (SQLException ex) {
-                Logger.getLogger(MinhaConexao.class.getName()).log(Level.SEVERE, null, ex);
             }
+        } catch (SQLException ex) {
+            Logger.getLogger(MinhaConexao.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     

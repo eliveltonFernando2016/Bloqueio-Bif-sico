@@ -11,17 +11,19 @@ package Model;
  */
 public class ItemFila {
     private int estado;
-    private String transacao;
+    private int transacao;
     private String dado;
+    private int idOperacao;
 
     public ItemFila() {
 
     }
 
-    public ItemFila(int estado, String transacao, String dado) {
+    public ItemFila(int estado, int transacao, String dado, int idOperacao) {
         this.estado = estado;
         this.transacao = transacao;
         this.dado = dado;
+        this.idOperacao = idOperacao;
     }
 
     public int getEstado() {
@@ -32,11 +34,11 @@ public class ItemFila {
         this.estado = estado;
     }
 
-    public String getTransacao() {
+    public int getTransacao() {
         return transacao;
     }
 
-    public void setTransacao(String transacao) {
+    public void setTransacao(int transacao) {
         this.transacao = transacao;
     }
 
@@ -46,5 +48,13 @@ public class ItemFila {
 
     public void setDado(String dado) {
         this.dado = dado;
+    }
+
+    public int getIdOperacao() {
+        return idOperacao;
+    }
+
+    public void setIdOperacao(int idOperacao) {
+        this.idOperacao = idOperacao;
     }
 }
